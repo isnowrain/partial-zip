@@ -1,0 +1,10 @@
+C:\Users\Admin\AppData\Local\Temporary Projects\partial-zip\bin\Debug\partial-zip.exe
+C:\Users\Admin\AppData\Local\Temporary Projects\partial-zip\bin\Debug\partial-zip.pdb
+C:\Users\Admin\AppData\Local\Temporary Projects\partial-zip\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Admin\AppData\Local\Temporary Projects\partial-zip\obj\x86\Debug\partial-zip.exe
+C:\Users\Admin\AppData\Local\Temporary Projects\partial-zip\obj\x86\Debug\partial-zip.pdb
+C:\Users\Admin\documents\visual studio 2010\Projects\partial-zip\partial-zip\obj\x86\Debug\partial-zip.exe
+C:\Users\Admin\documents\visual studio 2010\Projects\partial-zip\partial-zip\obj\x86\Debug\partial-zip.pdb
+C:\Users\Admin\documents\visual studio 2010\Projects\partial-zip\partial-zip\bin\Debug\partial-zip.exe
+C:\Users\Admin\documents\visual studio 2010\Projects\partial-zip\partial-zip\bin\Debug\partial-zip.pdb
+C:\Users\Admin\documents\visual studio 2010\Projects\partial-zip\partial-zip\obj\x86\Debug\ResolveAssemblyReference.cache

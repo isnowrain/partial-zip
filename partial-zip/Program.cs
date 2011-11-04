@@ -27,10 +27,10 @@ namespace partial_zip
             req = (HttpWebRequest)WebRequest.Create(url);
             req.AddRange(start, zipFileLength - 1);
             res = (HttpWebResponse)req.GetResponse();
-            byte[] data = Encoding.ASCII.GetBytes(new StreamReader(res.GetResponseStream()).ReadToEnd());            
-            int sigLoc = FindPattern(data,BitConverter.GetBytes(0x06054b50));
+            byte[] data = Encoding.Unicode.GetBytes(new StreamReader(res.GetResponseStream(),Encoding.Unicode).ReadToEnd());            
+            int sigLoc = FindPattern(data,BitConverter.GetBytes(0x06054b50));            
             byte[] buf = new byte[22];
-            for (int i = 0; i < 22; i++)
+            for (int i = 0; i < 21; i++)
             {
                 buf[i] = data[sigLoc + i];
             }
@@ -48,10 +48,29 @@ namespace partial_zip
             req = (HttpWebRequest)WebRequest.Create(url);
             req.AddRange(offsetOfCD, offsetOfCD + sizeOfCD -1);
             res = (HttpWebResponse)req.GetResponse();
-            data = Encoding.ASCII.GetBytes(new StreamReader(res.GetResponseStream()).ReadToEnd());
+            data = Encoding.Unicode.GetBytes(new StreamReader(res.GetResponseStream(),Encoding.Unicode).ReadToEnd());            
 
             rdr = new BinaryReader(new MemoryStream(data), Encoding.Unicode);
-                        
+
+            int cdSig = rdr.ReadInt32();
+            int version = rdr.ReadInt16();
+            int verNeedExtract = rdr.ReadInt16();
+            int bitFlag = rdr.ReadInt16();
+            int compMethod = rdr.ReadInt16();
+            int flmt = rdr.ReadInt16();
+            int flmd = rdr.ReadInt16();
+            int crc32 = rdr.ReadInt32();
+            int compSize = rdr.ReadInt32();
+            int unCompSize = rdr.ReadInt32();
+            int fNameLength = rdr.ReadInt16();
+            int eFLength = rdr.ReadInt16();
+            int fCl = rdr.ReadInt16();
+            int diskNo = rdr.ReadInt16();
+            int intFile = rdr.ReadInt16();
+            int extFile = rdr.ReadInt32();
+            int offSetLocalFileHeader = rdr.ReadInt32();
+
+
             Console.Read();
         }
                 

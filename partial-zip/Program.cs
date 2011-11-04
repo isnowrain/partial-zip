@@ -5,15 +5,22 @@ using System.Text;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.IO.Compression;
 namespace partial_zip
 {
+    //iSn0wra1n
     class Program
     {
         unsafe static void Main(string[] args)
         {
-
-            string url = "http://appldnld.apple.com/iPhone4/061-9858.20101122.Er456/iPhone3,1_4.2.1_8C148_Restore.ipsw";
-            string path = "Restore.plist";
+            if (args.Length != 3)
+            {                
+                Console.WriteLine("usage: {0} <zipurl> <path> <dest>",System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+                return;
+            }
+            string url = args[0];
+            string path = args[1];
+            string dest = args[2];
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
             req.Method = "HEAD";
             HttpWebResponse res = (HttpWebResponse)req.GetResponse();
@@ -144,18 +151,32 @@ namespace partial_zip
             int cSize = rdr.ReadInt32();
             int ucSize = rdr.ReadInt32();            
             short lenFileName = rdr.ReadInt16();
-            short lenExtraField = rdr.ReadInt16();
-            Console.WriteLine(flag);
+            short lenExtraField = rdr.ReadInt16();            
             //FileName
             //Extra Field
-            byte[] fileData = new byte[cSize];
+            byte[] fileData = new byte[compSize[index]];
             start = offSetLocalFileHeader[index] + 30 + lenFileName + lenExtraField;
             req = (HttpWebRequest)WebRequest.Create(url);            
-            req.AddRange(start, start + cSize - 1);
+            req.AddRange(start, start + compSize[index] - 1);
             res = (HttpWebResponse)req.GetResponse();
             res.GetResponseStream().Read(fileData, 0, fileData.Length);
-
-            
+            /*
+             * If bit 3 (0x08) of the general-purpose flags field is set, then the CRC-32 and file sizes are not known when the header is written. 
+             * The fields in the local header are filled with zero, and the CRC-32 and size are appended in a 12-byte structure immediately after the compressed data
+             */
+            if (method == 0x08)
+            {
+                DeflateStream decompress = new DeflateStream(new MemoryStream(fileData), CompressionMode.Decompress);
+                DeflateStream de = new DeflateStream(new MemoryStream(fileData), CompressionMode.Decompress);
+                int len = new StreamReader(de).ReadToEnd().Length;                
+                byte[] fData = new byte[len];
+                decompress.Read(fData,0,fData.Length);
+                File.WriteAllBytes(dest, fData);
+                Console.WriteLine("Done");
+                return;
+            }
+            File.WriteAllBytes(dest, fileData);
+            Console.WriteLine("Done");
             Console.Read();
         }
                  

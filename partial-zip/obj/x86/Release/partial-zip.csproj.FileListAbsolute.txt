@@ -1,0 +1,5 @@
+C:\Users\Admin\Documents\Visual Studio 2010\Projects\partial-zip\partial-zip\bin\Release\partial-zip.exe
+C:\Users\Admin\Documents\Visual Studio 2010\Projects\partial-zip\partial-zip\bin\Release\partial-zip.pdb
+C:\Users\Admin\Documents\Visual Studio 2010\Projects\partial-zip\partial-zip\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Admin\Documents\Visual Studio 2010\Projects\partial-zip\partial-zip\obj\x86\Release\partial-zip.exe
+C:\Users\Admin\Documents\Visual Studio 2010\Projects\partial-zip\partial-zip\obj\x86\Release\partial-zip.pdb

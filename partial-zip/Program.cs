@@ -13,6 +13,7 @@ namespace partial_zip
         {
 
             string url = "http://appldnld.apple.com/iPhone4/061-9858.20101122.Er456/iPhone3,1_4.2.1_8C148_Restore.ipsw";
+            string path = "Restore.plist";
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
             req.Method = "HEAD";
             HttpWebResponse res = (HttpWebResponse)req.GetResponse();
@@ -52,29 +53,113 @@ namespace partial_zip
 
             rdr = new BinaryReader(new MemoryStream(data), Encoding.Unicode);
 
-            int cdSig = rdr.ReadInt32();
-            int version = rdr.ReadInt16();
-            int verNeedExtract = rdr.ReadInt16();
-            int bitFlag = rdr.ReadInt16();
-            int compMethod = rdr.ReadInt16();
-            int flmt = rdr.ReadInt16();
-            int flmd = rdr.ReadInt16();
-            int crc32 = rdr.ReadInt32();
-            int compSize = rdr.ReadInt32();
-            int unCompSize = rdr.ReadInt32();
-            int fNameLength = rdr.ReadInt16();
-            int eFLength = rdr.ReadInt16();
-            int fCl = rdr.ReadInt16();
-            int diskNo = rdr.ReadInt16();
-            int intFile = rdr.ReadInt16();
-            int extFile = rdr.ReadInt32();
-            int offSetLocalFileHeader = rdr.ReadInt32();
+            int[] cdSig = new int[noOfCDRecords];
+            short[] version = new short[noOfCDRecords];
+            short[] verNeedExtract = new short[noOfCDRecords];
+            short[] bitFlag = new short[noOfCDRecords];
+            short[] compMethod = new short[noOfCDRecords];
+            short[] flmt = new short[noOfCDRecords];
+            short[] flmd = new short[noOfCDRecords];
+            int[] crc32 = new int[noOfCDRecords];
+            int[] compSize = new int[noOfCDRecords];
+            int[] unCompSize = new int[noOfCDRecords];
+            short[] fNameLength = new short[noOfCDRecords];
+            short[] eFLength = new short[noOfCDRecords];
+            short[] fCl = new short[noOfCDRecords];
+            short[] diskNo = new short[noOfCDRecords];
+            short[] intFile = new short[noOfCDRecords];
+            int[] extFile = new int[noOfCDRecords];
+            int[] offSetLocalFileHeader = new int[noOfCDRecords];
+            string[] fileName = new string[noOfCDRecords];
+            string[] extraField = new string[noOfCDRecords];
+            string[] fileComment = new string[noOfCDRecords];
+            for (int i = 0; i < noOfCDRecords; i++)
+            {
+                cdSig[i] = rdr.ReadInt32();
+                version[i] = rdr.ReadInt16();
+                verNeedExtract[i] = rdr.ReadInt16();
+                bitFlag[i] = rdr.ReadInt16();
+                compMethod[i] = rdr.ReadInt16();
+                flmt[i] = rdr.ReadInt16();
+                flmd[i] = rdr.ReadInt16();
+                crc32[i] = rdr.ReadInt32();
+                compSize[i] = rdr.ReadInt32();
+                unCompSize[i] = rdr.ReadInt32();
+                fNameLength[i] = rdr.ReadInt16();
+                eFLength[i] = rdr.ReadInt16();
+                fCl[i] = rdr.ReadInt16();
+                diskNo[i] = rdr.ReadInt16();
+                intFile[i] = rdr.ReadInt16();
+                extFile[i] = rdr.ReadInt32();
+                offSetLocalFileHeader[i] = rdr.ReadInt32();
+                
+                byte[] temp = new byte[fNameLength[i]];
+                rdr.Read(temp, 0, fNameLength[i]);
+                fileName[i] = Encoding.ASCII.GetString(temp);
+                                
+                if (eFLength[i] != 0)
+                {
+                    temp = new byte[eFLength[i]];
+                    rdr.Read(temp, 0, eFLength[i]);
+                    extraField[i] = Encoding.ASCII.GetString(temp);
+                }
+                if (fCl[i] != 0)
+                {
+                    temp = new byte[fCl[i]];
+                    rdr.Read(temp, 0, fCl[i]);
+                    fileComment[i] = Encoding.ASCII.GetString(temp);
+                }                                                
+            }
 
+            bool success = false;
+            int index = 0;
+            for (int i = 0; i < noOfCDRecords; i++)
+            {
+                if (fileName[i] == path)
+                {
+                    success = true;
+                    index = i;
+                }
+            }
+            if (success == false)
+            {
+                Console.WriteLine("Could not find '{0}' in archive", path);
+                return;
+            }
 
+            start = offSetLocalFileHeader[index];
+            req = (HttpWebRequest)WebRequest.Create(url);
+            req.AddRange(start, start + 30 - 1);
+            res = (HttpWebResponse)req.GetResponse();
+            data = Encoding.Unicode.GetBytes(new StreamReader(res.GetResponseStream(), Encoding.Unicode).ReadToEnd());
+            rdr = new BinaryReader(new MemoryStream(data), Encoding.Unicode);
+
+            int signature = rdr.ReadInt32();
+            short versionExtract = rdr.ReadInt16();
+            short flag = rdr.ReadInt16();
+            short method = rdr.ReadInt16();
+            short modTime = rdr.ReadInt16();
+            short modDate = rdr.ReadInt16();
+            int crc = rdr.ReadInt32();
+            int cSize = rdr.ReadInt32();
+            int ucSize = rdr.ReadInt32();            
+            short lenFileName = rdr.ReadInt16();
+            short lenExtraField = rdr.ReadInt16();
+            Console.WriteLine(flag);
+            //FileName
+            //Extra Field
+            byte[] fileData = new byte[cSize];
+            start = offSetLocalFileHeader[index] + 30 + lenFileName + lenExtraField;
+            req = (HttpWebRequest)WebRequest.Create(url);            
+            req.AddRange(start, start + cSize - 1);
+            res = (HttpWebResponse)req.GetResponse();
+            res.GetResponseStream().Read(fileData, 0, fileData.Length);
+
+            
             Console.Read();
         }
-                
-        static int FindPattern(byte[] data, byte[] pattern)
+                 
+        private static int FindPattern(byte[] data, byte[] pattern)
         {
             int idx1 = 0;
 

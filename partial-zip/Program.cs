@@ -14,8 +14,8 @@ namespace partial_zip
         unsafe static void Main(string[] args)
         {
             if (args.Length != 3)
-            {                
-                Console.WriteLine("usage: {0} <zipurl> <path> <dest>",System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+            {
+                Console.WriteLine("usage: {0} <zipurl> <path> <dest>", System.Diagnostics.Process.GetCurrentProcess().ProcessName);
                 return;
             }
             string url = args[0];
@@ -35,8 +35,8 @@ namespace partial_zip
             req = (HttpWebRequest)WebRequest.Create(url);
             req.AddRange(start, zipFileLength - 1);
             res = (HttpWebResponse)req.GetResponse();
-            byte[] data = Encoding.Unicode.GetBytes(new StreamReader(res.GetResponseStream(),Encoding.Unicode).ReadToEnd());            
-            int sigLoc = FindPattern(data,BitConverter.GetBytes(0x06054b50));            
+            byte[] data = Encoding.Unicode.GetBytes(new StreamReader(res.GetResponseStream(), Encoding.Unicode).ReadToEnd());
+            int sigLoc = FindPattern(data, BitConverter.GetBytes(0x06054b50));
             byte[] buf = new byte[22];
             for (int i = 0; i < 21; i++)
             {
@@ -52,11 +52,11 @@ namespace partial_zip
             int sizeOfCD = rdr.ReadInt32();
             int offsetOfCD = rdr.ReadInt32();
             int lenZipComment = rdr.ReadInt16();
-            
+
             req = (HttpWebRequest)WebRequest.Create(url);
-            req.AddRange(offsetOfCD, offsetOfCD + sizeOfCD -1);
+            req.AddRange(offsetOfCD, offsetOfCD + sizeOfCD - 1);
             res = (HttpWebResponse)req.GetResponse();
-            data = Encoding.Unicode.GetBytes(new StreamReader(res.GetResponseStream(),Encoding.Unicode).ReadToEnd());            
+            data = Encoding.Unicode.GetBytes(new StreamReader(res.GetResponseStream(), Encoding.Unicode).ReadToEnd());
 
             rdr = new BinaryReader(new MemoryStream(data), Encoding.Unicode);
 
@@ -99,11 +99,11 @@ namespace partial_zip
                 intFile[i] = rdr.ReadInt16();
                 extFile[i] = rdr.ReadInt32();
                 offSetLocalFileHeader[i] = rdr.ReadInt32();
-                
+
                 byte[] temp = new byte[fNameLength[i]];
                 rdr.Read(temp, 0, fNameLength[i]);
                 fileName[i] = Encoding.ASCII.GetString(temp);
-                                
+
                 if (eFLength[i] != 0)
                 {
                     temp = new byte[eFLength[i]];
@@ -115,7 +115,7 @@ namespace partial_zip
                     temp = new byte[fCl[i]];
                     rdr.Read(temp, 0, fCl[i]);
                     fileComment[i] = Encoding.ASCII.GetString(temp);
-                }                                                
+                }
             }
 
             bool success = false;
@@ -149,14 +149,14 @@ namespace partial_zip
             short modDate = rdr.ReadInt16();
             int crc = rdr.ReadInt32();
             int cSize = rdr.ReadInt32();
-            int ucSize = rdr.ReadInt32();            
+            int ucSize = rdr.ReadInt32();
             short lenFileName = rdr.ReadInt16();
-            short lenExtraField = rdr.ReadInt16();            
+            short lenExtraField = rdr.ReadInt16();
             //FileName
             //Extra Field
             byte[] fileData = new byte[compSize[index]];
             start = offSetLocalFileHeader[index] + 30 + lenFileName + lenExtraField;
-            req = (HttpWebRequest)WebRequest.Create(url);            
+            req = (HttpWebRequest)WebRequest.Create(url);
             req.AddRange(start, start + compSize[index] - 1);
             res = (HttpWebResponse)req.GetResponse();
             res.GetResponseStream().Read(fileData, 0, fileData.Length);
@@ -166,11 +166,9 @@ namespace partial_zip
              */
             if (method == 0x08)
             {
-                DeflateStream decompress = new DeflateStream(new MemoryStream(fileData), CompressionMode.Decompress);
-                DeflateStream de = new DeflateStream(new MemoryStream(fileData), CompressionMode.Decompress);
-                int len = new StreamReader(de).ReadToEnd().Length;                
-                byte[] fData = new byte[len];
-                decompress.Read(fData,0,fData.Length);
+                DeflateStream decompress = new DeflateStream(new MemoryStream(fileData), CompressionMode.Decompress);                
+                byte[] fData = new byte[unCompSize[index]];
+                decompress.Read(fData, 0, fData.Length);
                 File.WriteAllBytes(dest, fData);
                 Console.WriteLine("Done");
                 return;
@@ -179,7 +177,7 @@ namespace partial_zip
             Console.WriteLine("Done");
             Console.Read();
         }
-                 
+
         private static int FindPattern(byte[] data, byte[] pattern)
         {
             int idx1 = 0;
